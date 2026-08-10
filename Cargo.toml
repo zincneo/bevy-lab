@@ -9,3 +9,7 @@ bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 [[example]]
 name = "basic-lab-001-ecs"
 path = "examples/basic/lab-001-ecs.rs"
+
+[[example]]
+name = "basic-lab-002-commands"
+path = "examples/basic/lab-002-commands.rs"
