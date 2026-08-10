@@ -13,3 +13,7 @@ path = "examples/basic/lab-001-ecs.rs"
 [[example]]
 name = "basic-lab-002-commands"
 path = "examples/basic/lab-002-commands.rs"
+
+[[example]]
+name = "basic-lab-003-system"
+path = "examples/basic/lab-003-system.rs"
