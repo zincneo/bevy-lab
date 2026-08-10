@@ -11,9 +11,13 @@ name = "basic-lab-001-ecs"
 path = "examples/basic/lab-001-ecs.rs"
 
 [[example]]
-name = "basic-lab-002-commands"
-path = "examples/basic/lab-002-commands.rs"
+name = "basic-lab-002-app-world"
+path = "examples/basic/lab-002-app-world.rs"
 
 [[example]]
 name = "basic-lab-003-system"
 path = "examples/basic/lab-003-system.rs"
+
+[[example]]
+name = "basic-lab-004-commands"
+path = "examples/basic/lab-004-commands.rs"

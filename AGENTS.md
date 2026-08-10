@@ -34,7 +34,7 @@ docs/<topic>/lab-<NNN>-<kebab-case-name>.md
 规则：
 
 1. 每个主题目录必须存在无扩展名的 `topic` 文件。
-2. `topic` 第一行是主题简介；空一行后，每行使用 `NNN 描述` 记录该编号 lab 的演示内容。
+2. `topic` 第一行是主题简介；空一行后，每行使用 `NNN name 描述` 记录该编号 lab 的演示内容，其中 `name` 必须与 `lab-NNN-name.rs` 和对应 `.md` 文件名一致。
 3. lab 文件名固定为 `lab-NNN-name.rs`，编号在同一主题内三位补零且唯一，通常按递增顺序创建。
 4. 每个 lab 必须同时有同名的 `examples/<topic>/...rs` 和 `docs/<topic>/...md`。
 5. 文档文件用于完整解释、设计背景和运行观察；源码注释只保留必要上下文。
