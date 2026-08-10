@@ -19,5 +19,9 @@ name = "basic-lab-003-system"
 path = "examples/basic/lab-003-system.rs"
 
 [[example]]
-name = "basic-lab-004-commands"
-path = "examples/basic/lab-004-commands.rs"
+name = "basic-lab-004-schedule"
+path = "examples/basic/lab-004-schedule.rs"
+
+[[example]]
+name = "basic-lab-005-commands"
+path = "examples/basic/lab-005-commands.rs"
