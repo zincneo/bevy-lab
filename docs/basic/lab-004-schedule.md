@@ -33,11 +33,11 @@ PreUpdate → RunFixedMainLoop → Update → PostUpdate → Last
 | Schedule | 常见用途 |
 | --- | --- |
 | `PreUpdate` | 准备输入和外部数据。 |
-| `Update` | 每帧一次的游戏逻辑、输入响应、动画和 UI。 |
+| `Update` | 每帧一次的逻辑、输入响应、动画和界面更新。 |
 | `PostUpdate` | 根据本帧结果做同步、相机或 Transform 后处理。 |
 | `Last` | 清理、统计和调试输出。 |
 
-`RunFixedMainLoop` 主要负责驱动固定时间步，普通游戏逻辑通常不直接注册到这里。
+`RunFixedMainLoop` 主要负责驱动固定时间步，普通逻辑通常不直接注册到这里。
 
 ### `FixedUpdate`
 
@@ -108,13 +108,13 @@ PreUpdate
 Update → PostUpdate → Last
 ```
 
-对于平台类或俯视角 2D 游戏，常见分工是：
+一个常见的职责划分是：
 
 ```text
 初始化实体和资源 → Startup
 整理输入           → PreUpdate
 物理和碰撞         → FixedUpdate
-游戏逻辑和表现     → Update
+每帧逻辑和表现     → Update
 同步相机或变换     → PostUpdate
 调试统计和清理     → Last
 ```
@@ -131,13 +131,13 @@ app.add_systems(Update, (read_input, simulate, update_camera).chain());
 
 ## 小结
 
-学习 2D 游戏开发时，先掌握以下选择即可：
+选择 Schedule 时，先掌握以下对应关系即可：
 
 ```text
 Startup     一次性初始化
 PreUpdate   准备输入
 FixedUpdate 固定时间步模拟
-Update      每帧游戏逻辑和表现
+Update      每帧逻辑和表现
 PostUpdate  结果同步
 Last        收尾和统计
 ```

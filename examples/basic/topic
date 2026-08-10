@@ -5,3 +5,4 @@ ECS 架构与 Bevy 基础功能的入门实验。
 003 system 介绍 Bevy System 函数的注册条件与系统参数。
 004 schedule 介绍 Bevy 常用 Schedule 的执行顺序，以及不同类型 System 的基本分类方式。
 005 commands 介绍 Bevy Commands 的作用、延迟执行机制、参数声明方式与常用操作。
+006 query 介绍 Bevy Query 的数据访问、过滤器、单实体查询和常用查询方法。

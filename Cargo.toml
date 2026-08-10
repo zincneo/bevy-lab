@@ -25,3 +25,7 @@ path = "examples/basic/lab-004-schedule.rs"
 [[example]]
 name = "basic-lab-005-commands"
 path = "examples/basic/lab-005-commands.rs"
+
+[[example]]
+name = "basic-lab-006-query"
+path = "examples/basic/lab-006-query.rs"

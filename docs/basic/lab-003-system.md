@@ -55,4 +55,4 @@ Schedule 的选择方式见 Lab 004。
 
 ## 小结
 
-System 就是被 Schedule 调度的函数。编写普通游戏逻辑时，优先掌握 `Res`、`ResMut`、`Query`、`Commands` 和 `Local`，然后把 System 注册到合适的 Schedule 即可。
+System 就是被 Schedule 调度的函数。编写普通 System 时，优先掌握 `Res`、`ResMut`、`Query`、`Commands` 和 `Local`，然后把 System 注册到合适的 Schedule 即可。
