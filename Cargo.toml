@@ -69,3 +69,19 @@ path = "examples/basic/lab-015-observer.rs"
 [[example]]
 name = "basic-lab-016-local-system-state"
 path = "examples/basic/lab-016-local-system-state.rs"
+
+[[example]]
+name = "input-lab-001-keyboard"
+path = "examples/input/lab-001-keyboard.rs"
+
+[[example]]
+name = "input-lab-002-mouse"
+path = "examples/input/lab-002-mouse.rs"
+
+[[example]]
+name = "input-lab-003-gamepad"
+path = "examples/input/lab-003-gamepad.rs"
+
+[[example]]
+name = "input-lab-004-touch"
+path = "examples/input/lab-004-touch.rs"

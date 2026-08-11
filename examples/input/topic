@@ -1,0 +1,6 @@
+Bevy 输入系统的基础学习实验。
+
+001 keyboard 介绍使用 ButtonInput<KeyCode> 读取键盘按键的按下、持续按住和释放状态。
+002 mouse 介绍使用 ButtonInput<MouseButton> 读取鼠标按钮，以及读取每帧累计的移动和滚轮输入。
+003 gamepad 介绍通过 Gamepad Entity 查询多个手柄的按键、扳机和摇杆状态。
+004 touch 介绍使用 Touches Resource 查询全局触摸点的开始、移动、结束和取消状态。
