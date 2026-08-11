@@ -1,4 +1,4 @@
-use bevy::{prelude::*, time::TimeUpdateStrategy};
+use bevy::prelude::*;
 
 #[derive(Resource, Default)]
 struct LoopProgress {
@@ -46,11 +46,9 @@ fn main() {
         // MinimalPlugins 提供无窗口运行所需的时间、Schedule 和 runner。
         .add_plugins(MinimalPlugins)
         .insert_resource(LoopProgress::default())
-        // 让固定时间步的推进可预测，便于观察 FixedUpdate。
-        .insert_resource(Time::<Fixed>::from_hz(60.0))
-        .insert_resource(TimeUpdateStrategy::FixedTimesteps(1))
         .add_systems(Startup, startup)
         .add_systems(PreUpdate, pre_update)
+        // 这个示例很快退出，FixedUpdate 可能尚未累计到一个固定步长。
         .add_systems(FixedUpdate, fixed_update)
         .add_systems(Update, update)
         .add_systems(PostUpdate, post_update)

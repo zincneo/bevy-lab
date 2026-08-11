@@ -45,3 +45,11 @@ path = "examples/basic/lab-009-message.rs"
 [[example]]
 name = "basic-lab-010-run-if"
 path = "examples/basic/lab-010-run-if.rs"
+
+[[example]]
+name = "basic-lab-011-time"
+path = "examples/basic/lab-011-time.rs"
+
+[[example]]
+name = "basic-lab-012-timer"
+path = "examples/basic/lab-012-timer.rs"
