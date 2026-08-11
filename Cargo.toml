@@ -33,3 +33,15 @@ path = "examples/basic/lab-006-query.rs"
 [[example]]
 name = "basic-lab-007-resource"
 path = "examples/basic/lab-007-resource.rs"
+
+[[example]]
+name = "basic-lab-008-state"
+path = "examples/basic/lab-008-state.rs"
+
+[[example]]
+name = "basic-lab-009-message"
+path = "examples/basic/lab-009-message.rs"
+
+[[example]]
+name = "basic-lab-010-run-if"
+path = "examples/basic/lab-010-run-if.rs"
