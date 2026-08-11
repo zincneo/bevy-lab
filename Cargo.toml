@@ -53,3 +53,19 @@ path = "examples/basic/lab-011-time.rs"
 [[example]]
 name = "basic-lab-012-timer"
 path = "examples/basic/lab-012-timer.rs"
+
+[[example]]
+name = "basic-lab-013-plugin"
+path = "examples/basic/lab-013-plugin.rs"
+
+[[example]]
+name = "basic-lab-014-bundle"
+path = "examples/basic/lab-014-bundle.rs"
+
+[[example]]
+name = "basic-lab-015-observer"
+path = "examples/basic/lab-015-observer.rs"
+
+[[example]]
+name = "basic-lab-016-local-system-state"
+path = "examples/basic/lab-016-local-system-state.rs"

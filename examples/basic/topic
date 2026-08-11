@@ -12,3 +12,7 @@ ECS 架构与 Bevy 基础功能的入门实验。
 010 run-if 介绍 Bevy run_if 运行条件的作用、自定义条件、常用内置条件和条件组合。
 011 time 介绍 Bevy 的 Time 资源层次、TimeUpdateStrategy、虚拟时间、固定时间步，以及它们如何决定 FixedUpdate 的执行次数。
 012 timer 介绍 Bevy Timer 的创建、推进、完成判断、重复计时和重置的基本用法。
+013 plugin 介绍 Bevy Plugin 的基本结构，以及如何通过 Plugin 为 App 注册资源和系统。
+014 bundle 介绍 Bundle 如何组合多个 Component，以及如何使用 Bundle 创建实体。
+015 observer 介绍 Bevy Observer 的基本事件触发、监听和响应方式。
+016 local-system-state 介绍 Local 系统参数如何保存单个 System 的内部状态，以及它与 Resource、Component 的区别。
