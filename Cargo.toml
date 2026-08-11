@@ -71,6 +71,10 @@ name = "basic-lab-016-local-system-state"
 path = "examples/basic/lab-016-local-system-state.rs"
 
 [[example]]
+name = "basic-lab-017-default-resources-messages"
+path = "examples/basic/lab-017-default-resources-messages.rs"
+
+[[example]]
 name = "input-lab-001-keyboard"
 path = "examples/input/lab-001-keyboard.rs"
 
