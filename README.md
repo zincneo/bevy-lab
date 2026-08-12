@@ -38,11 +38,11 @@ docs/
   ```
 
 - 每个示例固定命名为 `lab-<三位编号>-<kebab-case-主题>.rs`，如 `lab-001-light.rs`。编号在同一主题内唯一，并按编号递增。
-- 每个 lab 都有一组同名文件：`examples/<主题>/lab-<编号>-<名称>.rs` 存放可运行代码，`docs/<主题>/lab-<编号>-<名称>.md` 存放说明文档。
+- 可运行 lab 有一组同名文件：`examples/<主题>/lab-<编号>-<名称>.rs` 存放代码，`docs/<主题>/lab-<编号>-<名称>.md` 存放说明文档。纯流程或平台打包专题可以只有 `docs/<主题>/lab-<编号>-<名称>.md`，这类条目不注册到 `Cargo.toml`，也不能使用 `just run`。
 
 ## 注册 lab
 
-新增 lab 时，创建对应的 `.rs`、`.md` 和 `topic` 条目，并在 `Cargo.toml` 中注册 example target。target 名称统一为 `<主题>-lab-<编号>-<名称>`：
+新增可运行 lab 时，创建对应的 `.rs`、`.md` 和 `topic` 条目，并在 `Cargo.toml` 中注册 example target。纯文档专题只创建 `.md` 和 `topic` 条目。可运行 target 名称统一为 `<主题>-lab-<编号>-<名称>`：
 
 ```toml
 [[example]]

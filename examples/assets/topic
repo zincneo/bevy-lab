@@ -1,0 +1,6 @@
+资源加载、资源生命周期和应用打包相关实验。
+
+001 image-loading 演示通过 BSN、UI Bundle 和 2D Sprite 三种实体创建方式加载图片；UI 图片在启动时加载，Sprite 使用另一张图片并在点击按钮后才创建实体、按需异步加载，同时说明 UI 摄像头与 Sprite 渲染层级的关系。
+002 asset-plugin 介绍 AssetPlugin 的资源根目录、常见资源格式对应的加载器，以及路径、句柄和资源进入内存之间的关系。
+003 packaging 介绍 Windows、Linux 和 Android 的发布构建、安装包组织方式，以及如何把 assets 资源随平台包一起分发。
+004 resource-encryption 介绍图片等资源的加密边界、Bevy 自定义资源加载器、AssetProcessor、单文件资源包与 AEAD 加密格式，以及 Debug 使用原始资源、Release 使用加密资源的组织方式。

@@ -133,3 +133,11 @@ path = "examples/ui/lab-010-bsn-dynamic.rs"
 [[example]]
 name = "ui-lab-011-styles"
 path = "examples/ui/lab-011-styles.rs"
+
+[[example]]
+name = "assets-lab-001-image-loading"
+path = "examples/assets/lab-001-image-loading.rs"
+
+[[example]]
+name = "assets-lab-002-asset-plugin"
+path = "examples/assets/lab-002-asset-plugin.rs"

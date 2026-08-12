@@ -36,12 +36,12 @@ docs/<topic>/lab-<NNN>-<kebab-case-name>.md
 1. 每个主题目录必须存在无扩展名的 `topic` 文件。
 2. `topic` 第一行是主题简介；空一行后，每行使用 `NNN name 描述` 记录该编号 lab 的演示内容，其中 `name` 必须与 `lab-NNN-name.rs` 和对应 `.md` 文件名一致。
 3. lab 文件名固定为 `lab-NNN-name.rs`，编号在同一主题内三位补零且唯一，通常按递增顺序创建。
-4. 每个 lab 必须同时有同名的 `examples/<topic>/...rs` 和 `docs/<topic>/...md`。
+4. 可运行 lab 必须同时有同名的 `examples/<topic>/...rs` 和 `docs/<topic>/...md`。纯流程、平台打包等无法单独运行的专题可以只有 `docs/<topic>/...md`，并且不注册 Cargo example。
 5. 文档文件用于完整解释、设计背景和运行观察；源码注释只保留必要上下文。
 
 ## Cargo 注册
 
-新增 `.rs` 示例后，必须在根目录 `Cargo.toml` 增加对应的 `[[example]]`，target 名称为 `<topic>-lab-NNN-name`：
+新增可运行 `.rs` 示例后，必须在根目录 `Cargo.toml` 增加对应的 `[[example]]`，target 名称为 `<topic>-lab-NNN-name`。纯文档专题不增加 `[[example]]`：
 
 ```toml
 [[example]]
@@ -49,7 +49,7 @@ name = "2d-lab-001-light"
 path = "examples/2d/lab-001-light.rs"
 ```
 
-同时检查 `name`、`path`、`topic` 条目和 `docs` 文件的编号与名称一致。
+同时检查 `name`、`path`、`topic` 条目和 `docs` 文件的编号与名称一致。纯文档专题只检查 `topic` 和 `docs` 文件的编号与名称一致。
 
 ## Just 命令
 
