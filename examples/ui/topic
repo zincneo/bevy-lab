@@ -1,0 +1,9 @@
+Bevy UI 布局、样式、文本、交互和常用 Widgets 的渐进学习实验。
+
+001 ui-basics 介绍在窗口中显示最简单的 UI 元素、基础 UI 组件以及通过父子关系构建树状 UI 实体结构。
+002 node-properties 介绍 Node 组件的字段、可提供的 UI 节点能力以及各字段常用类型的含义。
+003 node-visuals 介绍 UI 节点的颜色、图片、文字、文字布局以及 UiTransform 变换等常用视觉组件。
+004 events 介绍 UI 通过指针事件观察者接收悬浮、移出、按下、释放、点击，以及通过键盘输入和 Button 控件接收键盘激活。
+005 common-widgets 使用可滚动的纵向 Flex 展示 Button、Checkbox、RadioGroup、Slider 和 TextInput，并演示控件事件与外部 Resource 状态。
+006 bsn 使用最新的 bsn! 静态场景语法声明 005 的 UI 控件树，并将静态结构与动态系统分离。
+007 feathers 介绍 Bevy Feathers 主题控件，并用主题化控件重写 005/006 的常用 UI 画廊。

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", features = ["bevy_feathers"] }
 
 [[example]]
 name = "basic-lab-001-ecs"
@@ -89,3 +89,31 @@ path = "examples/input/lab-003-gamepad.rs"
 [[example]]
 name = "input-lab-004-touch"
 path = "examples/input/lab-004-touch.rs"
+
+[[example]]
+name = "ui-lab-001-ui-basics"
+path = "examples/ui/lab-001-ui-basics.rs"
+
+[[example]]
+name = "ui-lab-002-node-properties"
+path = "examples/ui/lab-002-node-properties.rs"
+
+[[example]]
+name = "ui-lab-003-node-visuals"
+path = "examples/ui/lab-003-node-visuals.rs"
+
+[[example]]
+name = "ui-lab-004-events"
+path = "examples/ui/lab-004-events.rs"
+
+[[example]]
+name = "ui-lab-005-common-widgets"
+path = "examples/ui/lab-005-common-widgets.rs"
+
+[[example]]
+name = "ui-lab-006-bsn"
+path = "examples/ui/lab-006-bsn.rs"
+
+[[example]]
+name = "ui-lab-007-feathers"
+path = "examples/ui/lab-007-feathers.rs"
