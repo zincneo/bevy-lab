@@ -117,3 +117,19 @@ path = "examples/ui/lab-006-bsn.rs"
 [[example]]
 name = "ui-lab-007-feathers"
 path = "examples/ui/lab-007-feathers.rs"
+
+[[example]]
+name = "ui-lab-008-animations"
+path = "examples/ui/lab-008-animations.rs"
+
+[[example]]
+name = "ui-lab-009-dynamic-ui"
+path = "examples/ui/lab-009-dynamic-ui.rs"
+
+[[example]]
+name = "ui-lab-010-bsn-dynamic"
+path = "examples/ui/lab-010-bsn-dynamic.rs"
+
+[[example]]
+name = "ui-lab-011-styles"
+path = "examples/ui/lab-011-styles.rs"

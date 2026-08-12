@@ -1,51 +1,57 @@
-# Lab 006：使用 `bsn!` 声明静态 UI
+# 006：BSN（Bevy Scene Notation）完整语法概览
 
-本实验把 Lab 005 的控件画廊改写为 `bsn!` 场景声明。按钮、复选框、单选组、滑动
-条、文本输入框、面板和父子关系都写在独立的场景函数中；交互 Observer、业务
-Resource 和每帧状态同步仍然是普通 Rust 函数。
-
-## 运行示例
+运行示例：
 
 ```bash
 nix develop
 just run ui 006
 ```
 
-## 一、`bsn!` 是什么
+本实验把 Lab 005 的控件画廊改写为 BSN 场景。BSN 用一段接近实体树的声明描述：
 
-`bsn!` 是 Bevy Scene Notation（Bevy 场景表示法）的宏。它把一段更接近“实体树”的
-声明转换为 Bevy 的 `Scene`：场景描述应该创建哪些 Entity、每个 Entity 添加哪些
-Component，以及这些 Entity 之间有什么关系。
+- 要创建哪些实体；
+- 每个实体有哪些组件以及组件的初始值；
+- 实体之间有什么关系；
+- 哪些场景需要组合、复用或附加 Observer。
 
-最小示例：
+BSN 不是 HTML，也不是另一套 UI 框架。它最终仍然创建 Bevy 的 Entity、Component、
+Children 和 Observer；它只是把静态实体结构从一连串 `Commands` 调用改成了可组合的场景声明。
+
+## 1. 从场景到 World
+
+`bsn!` 产生一个实现 `Scene` 的值。一个 `Scene` 描述一个根实体及其组件和相关实体，
+必须通过场景 API 才会真正进入 `World`：
 
 ```rust
 fn panel() -> impl Scene {
     bsn! {
         Node { width: px(320), height: px(80) }
         BackgroundColor(Color::srgb(0.1, 0.1, 0.1))
-        Children [
-            Text::new("A static child")
-        ]
+        Children [Text::new("A static child")]
     }
 }
-```
 
-这个场景仍然要通过 `spawn_scene` 或相关的场景扩展方法加入 World：
-
-```rust
 fn setup(mut commands: Commands) {
     commands.spawn(Camera2d);
     commands.spawn_scene(panel());
 }
 ```
 
-`bsn!` 不是另一套 UI 框架，也不是 HTML。它只是把原来嵌套的
-`commands.spawn(...).add_children(...)` 写法变成了静态场景声明。
+常用生成入口有：
 
-## 二、BSN 中最常用的语法
+| API | 用途 |
+| --- | --- |
+| `world.spawn_scene(scene)` | 在独占访问 `World` 时立即解析并生成场景 |
+| `commands.spawn_scene(scene)` | 在普通系统中提交生成命令；命令应用时生成场景 |
+| `world.queue_spawn_scene(scene)` | 等待场景依赖的资源加载完成后再生成 |
+| `commands.queue_spawn_scene(scene)` | 普通系统中的异步依赖版本 |
 
-### 1. 空白分隔的内容属于同一个 Entity
+没有资源依赖时，立即版本最简单；场景引用了还没加载的图片、字体等资源时，使用 queued
+版本。无论使用哪个入口，`bsn!` 本身都只是场景描述，不会自动运行 App 或系统。
+
+## 2. 一个实体中的场景条目
+
+在同一个场景层级中，空白分隔的条目作用于同一个实体：
 
 ```rust
 bsn! {
@@ -55,159 +61,470 @@ bsn! {
 }
 ```
 
-上面三个条目会添加到同一个 Entity。没有显式值的 Component 使用它的
-`Default`，带括号或字段的写法用于提供初始值：
+这相当于把 `Node`、`BackgroundColor` 和 `Button` 一起放入一个 `spawn` 元组。
+
+### 组件的三种常见写法
 
 ```rust
+// 单元组件或无参数组件：使用 Default
+Button
+
+// 元组组件：给出部分或全部字段
 SliderValue(50.0)
-SliderRange::new(0.0, 100.0)
 TabIndex(0)
+
+// 结构体组件：可以只覆盖需要修改的字段
+Node {
+    width: px(320),
+    flex_direction: FlexDirection::Column,
+}
 ```
 
-### 2. `Children [...]` 声明父子关系
-
-方括号中的每个逗号分隔项都是一个子场景：
+也可以使用模块路径、字段简写和枚举变体：
 
 ```rust
-Node { flex_direction: FlexDirection::Column }
-Children [
-    Text::new("Title"),
-    (
-        Node { width: px(200) }
-        BackgroundColor(Color::srgb(0.2, 0.2, 0.2))
-    ),
+ui_widgets::Button
+Node { width }
+Visibility::Hidden
+```
+
+字段没有写出的部分不会被随意清空，而是保留之前的补丁值；如果之前没有值，则使用
+类型默认值。这是 BSN 的“补丁”语义，详见第 7 节。
+
+要让自定义组件可以直接出现在 BSN 中，通常派生：
+
+```rust
+#[derive(Component, Default, Clone)]
+struct DemoMarker;
+```
+
+如果组件字段需要场景生成时的上下文，例如根据路径由 `AssetServer` 生成句柄，使用
+`FromTemplate`：
+
+```rust
+#[derive(Component, FromTemplate)]
+struct Icon {
+    image: Handle<Image>,
+}
+
+bsn! {
+    Icon { image: "icons/start.png" }
+}
+```
+
+枚举组件需要每个变体都有默认构造方式。可以使用 `VariantDefaults` 生成变体默认函数，
+或者直接使用 `FromTemplate`。普通 UI 实验一般只使用 `Default + Clone` 即可。
+
+### BSN 前缀速查
+
+| 写法 | 含义 |
+| --- | --- |
+| `Component`、`Component(...)`、`Component { ... }` | 添加或补丁一个组件 |
+| `scene()`、`{expr}` | 包含一个 `Scene` |
+| `@Widget`、`@Widget { @prop: value }` | 包含一个 `SceneComponent`，并设置 scene props |
+| `~Template`、`~Template { field: value }` | 把类型当作 `Template` 使用 |
+| `#Name`、`#{expr}` | 给实体命名并建立场景内引用 |
+| `on(handler)` | 给当前实体附加 Entity Observer |
+| `Children [...]`、`MyRelation [...]` | 用关系生成多个相关实体 |
+| `:scene`、`:"file.bsn"` | 请求缓存的场景；函数缓存和官方 `.bsn` 资源目前有限制 |
+| `{ expr }` | 在值位置插入 Rust 表达式 |
+
+## 3. `Children` 和关系
+
+`Children [...]` 会为当前实体生成相关的子实体：
+
+```rust
+bsn! {
+    Node { flex_direction: FlexDirection::Column }
+    Children [
+        Text::new("Title"),
+        (
+            Node { width: px(200) }
+            BackgroundColor(Color::srgb(0.2, 0.2, 0.2))
+        ),
+    ]
+}
+```
+
+方括号中的逗号分隔实体Entity；同一项中用空白分隔的内容仍属于同一个子实体。括号通常可以
+省略，但在内容复杂或需要明确“一个实体”时建议保留。子实体还可以继续拥有自己的
+`Children [...]`，从而构建完整的 UI 树。
+
+除了内置的 `Children`，BSN 也支持其它实现 `RelationshipTarget` 的关系：
+
+```rust
+Followers [
+    #GruntA Grunt,
+    #GruntB Grunt,
 ]
 ```
 
-这会创建一个根 Entity 和两个子 Entity。子场景还可以继续拥有自己的
-`Children [...]`，因此可以直接表达 UI 的树状结构。
-
-### 3. 使用函数组合静态场景
-
-`bsn!` 场景可以嵌套普通函数返回的 `impl Scene`：
+如果要直接把当前实体挂到已有实体上，可以使用：
 
 ```rust
-fn demo_root() -> impl Scene {
+ChildOf(parent_entity)
+```
+
+`ChildOf` 的参数可以是 `Entity`，也可以是同一个场景作用域中用 `#Name` 声明的实体引用。
+
+## 4. 场景组合
+
+任何返回 `impl Scene` 的函数都可以嵌入其它场景：
+
+```rust
+fn panel() -> impl Scene {
+    bsn! {
+        Node { padding: UiRect::all(px(18)) }
+    }
+}
+
+fn root() -> impl Scene {
     bsn! {
         Node
-        Children [button_panel(), slider_panel(), text_input_panel()]
+        Children [panel(), panel()]
     }
 }
 ```
 
-本实验使用 `panel()`、`section_title()` 和各个控件面板函数，把一个很长的 UI 树
-拆成多个可阅读、可复用的静态片段。它们仍然在启动时组合成同一棵 Entity 树。
+也可以使用 `{ expression }` 显式插入一个 `Scene`：
 
-### 4. 在场景中绑定 Observer
+```rust
+let content = panel();
+bsn! {
+    Node
+    Children [{content}]
+}
+```
 
-`on(system)` 可以把 Entity Observer 直接附加到场景中的实体：
+`scene()`、`scene(value)` 是用于包含场景函数的简写形式；普通函数调用和大括号表达式
+都可以完成同样的组合工作。场景组合不是简单的文本拼接，而是把各个场景产生的补丁按
+出现位置依次合并。
+
+## 5. `SceneComponent`：可命名的复合场景
+
+当一个场景片段需要一个稳定的语义名称，并且希望它自己就是一个可复用的层级组件时，
+可以派生 `SceneComponent`：
+
+```rust
+#[derive(SceneComponent, Clone, Default)]
+struct PanelStyle;
+
+impl PanelStyle {
+    fn scene() -> impl Scene {
+        bsn! {
+            Node { padding: UiRect::all(px(18)) }
+            BackgroundColor(Color::srgb(0.1, 0.1, 0.15))
+        }
+    }
+}
+
+bsn! {
+    @PanelStyle
+    Children [Text::new("Panel content")]
+}
+```
+
+`@PanelStyle` 会包含 `PanelStyle::scene()` 的内容，并把 `PanelStyle` 组件本身添加到
+实体上。这样既能复用结构，也能让普通 `Query<With<PanelStyle>>` 找到这些实体。
+
+默认情况下，派生宏会调用同名类型的 `scene()`；也可以指定场景函数：
+
+```rust
+#[derive(SceneComponent, Default, Clone)]
+#[scene(panel_scene)]
+struct PanelStyle;
+
+fn panel_scene() -> impl Scene {
+    bsn! { Node }
+}
+```
+
+### Scene props
+
+需要参数化场景时，使用 `#[scene(PropsType)]` 和 `@` 前缀的 prop：
+
+```rust
+#[derive(SceneComponent, Default, Clone)]
+#[scene(ListProps)]
+struct List;
+
+#[derive(Default)]
+struct ListProps {
+    count: usize,
+}
+
+impl List {
+    fn scene(props: ListProps) -> impl Scene {
+        let items = (0..props.count).map(|i| bsn! {
+            Text::new(format!("Item {i}"))
+        }).collect::<Vec<_>>();
+        bsn! {
+            Node
+            Children [{items}]
+        }
+    }
+}
+
+bsn! {
+    @List { @count: 3 }
+}
+```
+
+`@count` 是场景参数；普通的 `count: value` 则是给 `List` 组件自身字段打补丁。两者
+可以同时存在，但 prop 会在场景包含时立即用于生成内部场景。
+
+## 6. 命名实体和实体引用
+
+`#Name` 会给当前实体添加 `Name("Name")`，并在当前场景作用域中建立引用：
+
+```rust
+bsn! {
+    #Panel
+    Node
+    Children [
+        #Title Text::new("Title"),
+        Link(#Panel),
+    ]
+}
+```
+
+也可以手动写 `Name("Custom name")`，或者让名称来自表达式：
+
+```rust
+bsn! {
+    #{name}
+    Name("Visible name")
+}
+```
+
+`#Title`、`#Panel` 是场景构建时的引用，不是运行时 `Entity` 的永久别名。引用要传给
+组件字段时，该字段需要支持 `FromTemplate`，BSN 才能把 `EntityTemplate` 解析为实体。
+
+## 7. 补丁和组合顺序
+
+BSN 不要求每次都把组件的所有字段重新写一遍。后出现的条目只修改它明确写出的字段：
+
+```rust
+bsn! {
+    Node { width: px(100), height: px(300) }
+    Node { width: px(200) }
+}
+```
+
+最终结果是 `width = 200`、`height = 300`。场景函数也遵循同样的顺序：
+
+```rust
+bsn! {
+    base_panel()
+    Node { width: px(640) }
+}
+```
+
+这会复用 `base_panel()` 的其它字段，只覆盖宽度。补丁是按场景条目顺序合并的，因此
+可以把基础样式放在前面，把局部覆盖放在后面。需要注意：同一实体中的条目是补丁，
+`Children [...]` 中的逗号则表示创建不同实体，不是覆盖同一个组件。
+
+## 8. Observer
+
+`on(handler)` 会把一个 Entity Observer 附加到当前实体；Observer 的第一个参数类型决定
+它监听哪一种 `EntityEvent`：
 
 ```rust
 (
     Button
     on(button_activated)
-    Node { width: px(440), height: px(48) }
 )
-```
 
-这和 `commands.entity(entity).observe(button_activated)` 是同一种 Observer，只是
-Entity 还没有手动创建时，就可以在 BSN 声明中完成绑定。
-
-## 三、用 BSN 重写 Lab 005
-
-### 1. 静态树放在 `demo_root`
-
-006 的启动系统只负责创建相机和场景：
-
-```rust
-fn setup(mut commands: Commands) {
-    commands.spawn(Camera2d);
-    commands.spawn_scene(demo_root());
+fn button_activated(event: On<Activate>, mut state: ResMut<AppState>) {
+    info!("activated {:?}", event.entity);
+    state.count += 1;
 }
 ```
 
-`demo_root()` 中声明根节点、滚动区域、标题以及五个面板：
+也可以直接写闭包：
 
 ```rust
-fn demo_root() -> impl Scene {
-    bsn! {
-        ScrollArea
-        Node {
-            width: percent(100),
-            height: percent(100),
-            flex_direction: FlexDirection::Column,
-            overflow: Overflow::scroll_y(),
+bsn! {
+    Button
+    on(|event: On<Activate>, mut query: Query<&mut Pressed>| {
+        if let Ok(mut pressed) = query.get_mut(event.entity) {
+            pressed.0 = true;
         }
-        TabGroup
+    })
+}
+```
+
+每个 `on(...)` 都会添加一个独立 Observer；它可以使用普通系统参数访问 `Query`、
+`Resource`、`Commands` 等 ECS 数据。BSN 只负责注册 Observer，Observer 的执行仍由事件
+触发时的 ECS 流程负责。
+
+## 9. 场景列表：`bsn_list!`
+
+`bsn!` 始终描述一个根实体；需要同时生成多个没有共同父实体的根实体时使用 `bsn_list!`：
+
+```rust
+let scenes = bsn_list![
+    #First Text::new("First"),
+    #Second Text::new("Second"),
+];
+
+commands.spawn_scene_list(scenes);
+```
+
+列表中的实体使用逗号分隔；同一个实体的多个组件仍然使用空白分隔。列表中的所有根
+实体共享一个命名作用域，因此可以相互引用。
+
+`SceneList` 也可以嵌入关系列表中：
+
+```rust
+fn container(items: impl SceneList) -> impl Scene {
+    bsn! {
+        Node
         Children [
-            button_panel(),
-            checkbox_panel(),
-            radio_panel(),
-            slider_panel(),
-            text_input_panel(),
+            #Header Text::new("Header"),
+            {items},
+            #Footer Text::new("Footer"),
         ]
     }
 }
 ```
 
-这部分只描述“有哪些实体、它们如何嵌套、初始组件是什么”，不负责每一帧改变
-颜色、文字或 Resource。
+这里的 `{items}` 会展开列表中的多个实体。如果想把一个 `Scene` 当成一个实体而不是
+展开列表，需要用括号包住表达式：`({one_scene})`。
 
-### 2. 动态行为仍然使用普通 Rust 系统
+## 10. 动态值和 Rust 表达式
 
-静态声明可以直接附加 Observer，但复杂状态同步仍然写成普通函数：
-
-- `button_activated` 修改 `WidgetState::button_activations`；
-- `checkbox_changed` 保存 `ValueChange<bool>`；
-- `radio_changed` 把选中 Entity 转换为 `RadioChoice`；
-- `slider_value_changed` 同时更新 `SliderValue` 和百分值 Resource；
-- `commit_text_on_enter` 检查当前 `InputFocus`，只在 Enter 时提交文本；
-- `update_*` 系统根据组件和 Resource 修改视觉状态。
-
-例如滑动条 Observer 仍然是普通 Rust 函数，只是 Observer 的注册位置从启动代码移到
-BSN 场景中：
+BSN 不是只能写常量。场景函数是普通 Rust 函数，可以接收参数、捕获变量，并在值位置
+使用 `{ ... }` 插入任意 Rust 表达式：
 
 ```rust
-fn slider_value_changed(
-    event: On<ValueChange<f32>>,
-    mut state: ResMut<WidgetState>,
-    mut commands: Commands,
-) {
-    state.slider_percent = event.value;
-    commands
-        .entity(event.source)
-        .insert(SliderValue(event.value));
+fn health_bar(current: f32, max: f32) -> impl Scene {
+    bsn! {
+        Node { width: {px(300.0 * current / max)} }
+        Health { current, max }
+    }
 }
 ```
 
-## 四、BSN 与手动 `Commands` 的对应关系
+简单的局部变量通常可以直接写；复杂表达式、运算、字符串拼接和需要避免宏歧义的内容
+使用大括号：
 
-| 手动写法 | BSN 写法 |
-| --- | --- |
-| `commands.spawn((Node { .. }, Button))` | `bsn! { Node { .. } Button }` |
-| `commands.entity(parent).add_child(child)` | `Children [child_scene()]` |
-| `commands.entity(entity).observe(handler)` | `on(handler)` 放在该 Entity 的场景中 |
-| 多次 `spawn` 后再保存 Entity | 用场景中的组件标记查询，例如 `With<DemoSlider>` |
-| 启动系统中逐个构建 UI | `commands.spawn_scene(demo_root())` |
+```rust
+let label = format!("Score: {score}");
+bsn! {
+    Text::new({label})
+    Score({score})
+}
+```
 
-BSN 只改变“静态实体结构的书写方式”，不改变 ECS 的 Entity、Component、Children、
-Observer 或 System。理解 005 中的 ECS UI 组成后，可以把静态部分迁移到 BSN，而不
-需要重新学习交互逻辑。
+BSN 语法本身还没有独立的 `if`/`match` 条目。条件内容应在宏外计算，或放入表达式块：
 
-## 五、什么时候使用 BSN
+```rust
+let color = if selected { Color::srgb(0.2, 0.6, 1.0) } else { Color::GRAY };
+bsn! { BackgroundColor({color}) }
+```
 
-适合放入 `bsn!` 的内容：
+完全不同的场景可以先放入 `Box<dyn Scene>`，再通过 `{scene}` 插入。数据在场景生成后
+才变化时，BSN 不会自动响应；应由系统使用 `Commands` 创建、删除或修改实体，详见 UI 010。
 
-- 固定的 UI 层级和父子关系；
+## 11. `Template`、`template_value` 和上下文
+
+BSN 中的组件值通常是一个可复制的模板。需要把已经存在的组件实例传入场景时，使用
+`template_value`：
+
+```rust
+let transform = Transform::from_xyz(10.0, 20.0, 0.0);
+bsn! {
+    template_value(transform)
+}
+```
+
+需要自定义生成逻辑或访问 `World` 时，可以使用 `template` 闭包：
+
+```rust
+bsn! {
+    template(|context| {
+        let config = context.resource::<UiConfig>();
+        TooltipText(config.help.clone())
+    })
+}
+```
+
+`TemplateContext` 提供当前实体、`World` 资源和命名实体引用等场景生成上下文。更复杂
+的可复用模板可以实现 `Template`，或者为组件派生 `FromTemplate`。`~Type` 前缀用于明确
+把一个类型当作 `Template` 使用，而不是普通 Component：
+
+```rust
+bsn! {
+    ~MyTemplate
+    ~MyTemplate { value: 3 }
+}
+```
+
+这是 BSN 最灵活的扩展点，但日常 UI 通常优先使用 `Default + Clone`、场景函数或
+`SceneComponent`。
+
+## 12. 资源路径和依赖
+
+当某个字段是 `Handle<T>`，并且拥有 `FromTemplate` 能力时，可以直接写资源路径：
+
+```rust
+bsn! {
+    ImageNode { image: "ui/icons/start.png" }
+}
+```
+
+BSN 会把路径转换成场景依赖，在依赖加载前不能安全解析场景。因此有资源依赖的场景通常
+使用 `queue_spawn_scene`。资源路径只解决句柄加载，不会让 BSN 变成完整的外部 UI 文件格式。
+
+## 13. 缓存和 `.bsn` 文件现状
+
+前缀 `:` 表示希望缓存一个场景：
+
+```rust
+bsn! {
+    :base_panel()
+    Node { width: px(640) }
+}
+```
+
+当前 Bevy 主分支的缓存仍有明确限制：场景资源缓存可用，但函数场景和
+`SceneComponent` 的缓存尚未完整接通，不能把所有 `:scene()` 写法都当成可用功能。
+
+官方 `.bsn` 资产格式也尚未发布。虽然语法中预留了 `:"ui/panel.bsn"`，但当前不能直接
+把 `.bsn` 文件放入 `assets/` 后加载。现在需要把 BSN 写在 Rust 中，或者自己实现资源格式
+和 `AssetLoader`。
+
+## 14. 006 示例中的职责划分
+
+006 使用的结构可以概括为：
+
+```text
+setup
+└── commands.spawn_scene(demo_root())
+    └── demo_root / panel / button_panel / ...   BSN 静态实体树
+
+Update 和 Observer
+└── 读取输入、Resource、Query
+    └── 修改文字、颜色、滑块值和控件状态
+```
+
+适合写进 BSN 的内容：
+
+- 固定的实体层级和父子关系；
 - 初始布局、颜色、字体和控件组件；
+- 可复用的场景函数和 `SceneComponent`；
 - 固定的 Observer 注册；
-- 可拆分、可复用的静态场景函数。
+- 已知的资源路径和场景依赖。
 
-仍然应该使用普通 System 或 Commands 的内容：
+仍然应该交给普通 System 或 Commands 的内容：
 
-- 根据游戏状态动态创建或删除实体；
-- 每帧修改布局、颜色、文字和控件状态；
-- 读取输入并更新 Resource；
-- 需要运行时决定的子节点数量。
+- 每帧或按状态变化修改组件；
+- 运行时决定的子实体数量；
+- 动态创建、删除和重排 UI；
+- 读取输入、Resource、Message 或其它 ECS 数据；
+- 需要在场景生成后才知道的内容。
 
-因此 006 的结构是：`bsn!` 负责静态 UI 场景，ECS System 负责运行中的数据和行为。
+BSN 的完整使用方式可以归纳为：用场景条目描述实体，用 `Children` 或其它关系组织
+实体，用函数和 `SceneComponent` 组合场景，用补丁覆盖局部字段，用模板处理生成上下文，
+再由普通 ECS 系统负责运行时行为。
